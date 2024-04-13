@@ -72,8 +72,8 @@ const Presentation: FC<Props> = ({
 
 // Container Component
 export const AnimatedSplashScreen: FC<ContainerProps> = ({ children, imagePath }) => {
-  const [isAppReady, setAppReady] = useState(false)
-  const [isSplashComplete, setSplashComplete] = useState(false)
+  const [isAppReady, setIsAppReady] = useState(false)
+  const [isSplashComplete, setIsSplashComplete] = useState(false)
   const animation = useMemo(() => new Animated.Value(1), [])
   const backGroundColor = useMemo(() => Constants.expoConfig?.splash?.backgroundColor ?? 'white', [])
   const splashResizeMode = useMemo(() => Constants.expoConfig?.splash?.resizeMode ?? 'contain', [])
@@ -86,10 +86,12 @@ export const AnimatedSplashScreen: FC<ContainerProps> = ({ children, imagePath }
         toValue: 0,
         duration: 1000,
         useNativeDriver: true,
-      }).start(() => setSplashComplete(true))
+      }).start(() => setIsSplashComplete(true))
     }
   }, [isAppReady, animation])
 
+  // 画像の準備ができたら実行される関数
+  // Animated.ImageのonLoadEnd属性に渡している
   const onImageLoaded = useCallback(() => {
     void (async () => {
       try {
@@ -97,12 +99,13 @@ export const AnimatedSplashScreen: FC<ContainerProps> = ({ children, imagePath }
       } catch (e) {
         console.log(e)
       } finally {
-        // アプリの準備ができたらisAppReadyをtrueにする
-        setAppReady(true)
+        // アプリの準備ができたフラグであるisAppReadyをtrueにする
+        setIsAppReady(true)
       }
     })()
   }, [])
 
+  // 起動後にホーム画面へ戻ってきたときにはSplashScreenを非表示にする（アニメーションしない）
   if (isSplashComplete) onImageLoaded()
   return (
     <Presentation
